@@ -11,7 +11,7 @@ from bpy.props import (StringProperty,
                        FloatVectorProperty,
                        EnumProperty,
                        )
-from .blender_re_mesh import solveRepeatedUVs
+from .blender_re_mesh import solveRepeatedUVs, keepsAuthoredNormals, setKeepsAuthoredNormals
 from .operation_progress import operation_scope
 from .re_mesh_propertyGroups import (ExporterNodePropertyGroup, MESH_UL_REExporterList,
 	getBatchMeshWeightLimitDefault, getBatchMeshWeightLimit, setBatchMeshWeightLimit)
@@ -29,6 +29,49 @@ _BATCH_MESH_FIX_DEFAULTS = {
 	"shapeKeyExportMode": "KEEPNORMALS",
 	"preserveMaterialTable": False,
 }
+
+
+def _active_shape_key(context):
+	"""The active non-basis shape key of the active mesh object, or None."""
+	obj = context.object
+	if obj is None or obj.type != "MESH" or obj.data.shape_keys is None:
+		return None
+	key = obj.active_shape_key
+	if key is None or key == obj.data.shape_keys.reference_key:
+		return None
+	return key
+
+
+class WM_OT_ToggleKeepAuthoredNormals(Operator):
+	bl_label = "Keep Authored Normals"
+	bl_idname = "re_mesh.toggle_keep_authored_normals"
+	bl_description = ("Shape key export with Keep Custom Normals: store this key's normals as authored "
+		"instead of turning them with the key's deformation. For toon faces lit by their authored "
+		"normals and for overlays that unfold from a collapsed rest")
+	bl_options = {'UNDO'}
+
+	@classmethod
+	def poll(cls, context):
+		return _active_shape_key(context) is not None
+
+	def execute(self, context):
+		key = _active_shape_key(context)
+		data = context.object.data
+		setKeepsAuthoredNormals(data, key.name, not keepsAuthoredNormals(data, key))
+		return {'FINISHED'}
+
+
+def draw_keep_authored_normals(self, context):
+	"""Row under Blender's Shape Keys panel for the active key."""
+	key = _active_shape_key(context)
+	if key is None:
+		return
+	keep = keepsAuthoredNormals(context.object.data, key)
+	self.layout.operator(WM_OT_ToggleKeepAuthoredNormals.bl_idname,
+		text="RE Export: Keep Authored Normals",
+		icon="CHECKBOX_HLT" if keep else "CHECKBOX_DEHLT", depress=keep)
+
+
 class WM_OT_DeleteLoose(Operator):
 	bl_label = "Delete Loose Geometry"
 	bl_idname = "re_mesh.delete_loose"

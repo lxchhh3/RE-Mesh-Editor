@@ -18,6 +18,7 @@ normalization, the Wilds normal-group byte mapping and game version tables.
 "<path to>/blender.exe" --background --factory-startup --python-exit-code 1 --python tests/test_meshfix_blender.py
 "<path to>/blender.exe" --background --factory-startup --python-exit-code 1 --python tests/test_export_reliability_blender.py
 "<path to>/blender.exe" --background --factory-startup --python-exit-code 1 --python tests/test_mdf_props_blender.py
+"<path to>/blender.exe" --background --factory-startup --python-exit-code 1 --python tests/test_keep_authored_normals_blender.py
 ```
 
 - `test_meshfix_blender.py`: rotated custom normals on import, DD2 secondary
@@ -47,3 +48,7 @@ failed; the console output lists each `PASS`/`FAIL`.
 
 The `tests` folder is not a Python package and is never imported by the
 add-on, so it does not affect loading or the updater.
+- `test_keep_authored_normals_blender.py`: the per-key Keep Authored Normals toggle (Shape Keys
+  panel) and Wilds Keep Custom Normals export: a flagged key stores each row's authored normal,
+  an unflagged key with the same deltas stores normals turned by its deformation (read back from
+  the keep-normals second rows, which the importer drops).

@@ -167,6 +167,36 @@ def _export_shape_key_name(meshData, shapeKey):
 	return shapeKey.name
 
 
+# Keep Custom Normals export stores each key's own row normals: the authored
+# normal turned by the key's deformation. Keys named here store the authored
+# normal unchanged instead (toggled per key in the Shape Keys panel), so a toon
+# face lit by its authored normals is not shaded as the key deforms it (a
+# puffed cheek), and overlay geometry unfolding from a collapsed rest keeps the
+# normals it was authored with. Keyed by the Blender key name, like
+# RE_FullShapeKeyNames; renaming a key drops its flag.
+KEEP_AUTHORED_NORMALS_PROPERTY = "RE_KeepAuthoredNormals"
+
+
+def keepsAuthoredNormals(meshData, shapeKey):
+	keys = meshData.shape_keys
+	flagged = keys.get(KEEP_AUTHORED_NORMALS_PROPERTY) if keys is not None else None
+	return flagged is not None and shapeKey.name in flagged
+
+
+def setKeepsAuthoredNormals(meshData, keyName, keep):
+	keys = meshData.shape_keys
+	if keys is None:
+		return False
+	if keys.get(KEEP_AUTHORED_NORMALS_PROPERTY) is None:
+		keys[KEEP_AUTHORED_NORMALS_PROPERTY] = {}
+	flagged = keys[KEEP_AUTHORED_NORMALS_PROPERTY]
+	if keep:
+		flagged[keyName] = 1
+	elif keyName in flagged:
+		del flagged[keyName]
+	return True
+
+
 def _get_export_shape_keys(meshData):
 	if meshData.shape_keys is None:
 		return (None, [])
@@ -383,7 +413,10 @@ def _build_blend_shape_entries_for_export(
 			shapeNormals = None
 			try:
 				shapeMesh.transform(transformMatrix)
-				if wantNormals:
+				if wantNormals and keepsAuthoredNormals(rawsubmesh.data, shapeKey):
+					# flagged in the Shape Keys panel: the authored row normals, unturned
+					shapeNormals = baseNormals.copy()
+				elif wantNormals:
 					shapeCornerVertices, shapeCornerNormals = _corner_normal_arrays(
 						shapeMesh
 					)

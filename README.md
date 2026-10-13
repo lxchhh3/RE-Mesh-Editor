@@ -43,6 +43,13 @@ feature list, documentation and credits.
   - **locked** keys are applied to the exported mesh at their current value and are not exported as
     shape keys;
   - keys whose name starts with `DUMMY_` are also not exported (use them for previews).
+- **Keep Authored Normals** (per key, in the Shape Keys panel: *RE Export: Keep Authored Normals*):
+  with *Keep Custom Normals* export, each key normally stores its normals turned by its deformation,
+  so the game lights the shape the key makes. A flagged key stores the mesh's authored normals
+  unchanged instead: a toon face lit by its authored normals is not shaded as the key deforms it
+  (a puffed cheek), and overlay geometry that unfolds from a collapsed rest keeps its authored
+  normals. Saved on the shape keys as `RE_KeepAuthoredNormals` by key name; renaming a key drops its
+  flag. Off by default.
 
 **Other changes**
 

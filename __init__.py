@@ -59,6 +59,8 @@ from .modules.mesh.re_mesh_operators import (
 	WM_OT_REBatchExporter,
 	WM_OT_SolveRepeatedUVs,
 	WM_OT_QuickBatchExport,
+	WM_OT_ToggleKeepAuthoredNormals,
+	draw_keep_authored_normals,
 
 )
 from .modules.mesh.ui_re_mesh_panels import (
@@ -1758,6 +1760,7 @@ classes = [
 	
 	ImportREMesh,
 	ExportREMesh,
+	WM_OT_ToggleKeepAuthoredNormals,
 	WM_OT_DeleteLoose,
 	WM_OT_RenameMeshToREFormat,
 	WM_OT_RemoveZeroWeightVertexGroups,
@@ -2013,6 +2016,8 @@ def register():
 	
 	bpy.types.TOPBAR_MT_file_import.append(re_mesh_editor_import)
 	bpy.types.TOPBAR_MT_file_export.append(re_mesh_editor_export)
+	# per-key Keep Authored Normals toggle under Blender's Shape Keys panel
+	bpy.types.DATA_PT_shape_keys.append(draw_keep_authored_normals)
 
 	#Blender 4.1 and higher drag and drop operators
 	if bpy.app.version >= (4, 1, 0):
@@ -2043,6 +2048,7 @@ def unregister():
 	
 	bpy.types.TOPBAR_MT_file_import.remove(re_mesh_editor_import)
 	bpy.types.TOPBAR_MT_file_export.remove(re_mesh_editor_export)
+	bpy.types.DATA_PT_shape_keys.remove(draw_keep_authored_normals)
 	
 	if bpy.app.version >= (4, 1, 0):
 		bpy.utils.unregister_class(MESH_FH_drag_import)
