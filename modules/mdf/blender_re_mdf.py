@@ -188,7 +188,9 @@ def addPropsToPropList(obj,matPropertyList):
 		if prop.propName in colorPropertySet or (prop.paramCount == 4 and ("color" in lowerPropName or "_col_" in lowerPropName) and "rate" not in lowerPropName):
 			newListItem.data_type = "COLOR"
 			newListItem.color_value = prop.propValue
-		elif prop.paramCount == 1 and ("Use" in prop.propName or "_or_" in prop.propName or prop.propName.startswith("is")) or prop.propName in boolPropertySet:
+		#Guessing a bool from the name alone loses data: some "Use" properties are floats (MH Wilds UseCounterExposureEmit = 0.63 was exported as 1.0).
+		#Only treat a name match as a bool when the stored value is actually 0 or 1.
+		elif prop.propName in boolPropertySet or (prop.paramCount == 1 and ("Use" in prop.propName or "_or_" in prop.propName or prop.propName.startswith("is")) and prop.propValue[0] in (0.0,1.0)):
 			newListItem.data_type = "BOOL"
 			newListItem.bool_value = bool(prop.propValue[0])
 		elif prop.paramCount > 1:
